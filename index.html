@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="monetag" content="b47e3b07b47dfebbaae9066629c61c7c">
+  <title>CoinVault — Lobby</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --gold: #f5c842;
+      --gold-dark: #c99a1a;
+      --gold-glow: rgba(245, 200, 66, 0.35);
+      --bg: #090b10;
+      --bg2: #0e1118;
+      --card: #12161f;
+      --card-border: #1e2535;
+      --text: #e8eaf0;
+      --muted: #6b7591;
+      --green: #30e89b;
+      --purple: #9b6dff;
+      --red: #ff5c6a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Animated background grid ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(245,200,66,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,200,66,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Floating orbs ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      animation: orbFloat 8s ease-in-out infinite alternate;
+    }
+    .orb1 { width: 400px; height: 400px; background: rgba(245,200,66,0.08); top: -100px; left: -100px; }
+    .orb2 { width: 300px; height: 300px; background: rgba(155,109,255,0.07); bottom: -80px; right: -80px; animation-delay: -3s; }
+    .orb3 { width: 200px; height: 200px; background: rgba(48,232,155,0.05); top: 50%; left: 50%; animation-delay: -5s; }
+
+    @keyframes orbFloat {
+      from { transform: translate(0,0) scale(1); }
+      to   { transform: translate(30px, 20px) scale(1.1); }
+    }
+
+    /* ── Layout ── */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      margin-bottom: 60px;
+      animation: fadeDown 0.8s ease both;
+    }
+
+    .logo-ring {
+      width: 80px; height: 80px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #ffe680, var(--gold-dark));
+      box-shadow: 0 0 40px var(--gold-glow), 0 0 80px rgba(245,200,66,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 38px;
+      animation: spinPulse 4s ease-in-out infinite;
+    }
+
+    @keyframes spinPulse {
+      0%,100% { box-shadow: 0 0 40px var(--gold-glow), 0 0 80px rgba(245,200,66,0.15); }
+      50%      { box-shadow: 0 0 60px rgba(245,200,66,0.6), 0 0 120px rgba(245,200,66,0.25); }
+    }
+
+    h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      background: linear-gradient(135deg, #ffe680 0%, var(--gold) 50%, var(--gold-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      line-height: 1;
+    }
+
+    .subtitle {
+      margin-top: 10px;
+      font-size: 1.1rem;
+      color: var(--muted);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+    }
+
+    /* ── Balance bar ── */
+    .balance-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 50px;
+      padding: 10px 24px;
+      margin-top: 24px;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.85rem;
+      color: var(--gold);
+      animation: fadeDown 0.9s ease 0.1s both;
+    }
+    .balance-bar span { color: var(--muted); font-size: 0.75rem; letter-spacing: 0.1em; }
+    .balance-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: blink 1.5s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* ── Cards grid ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 36px 28px;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      animation: fadeUp 0.7s ease both;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.15s; }
+    .card:nth-child(2) { animation-delay: 0.25s; }
+    .card:nth-child(3) { animation-delay: 0.35s; }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, var(--card-glow, transparent) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .card:hover::before { opacity: 1; }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.02);
+    }
+
+    /* Per-card accent colors */
+    .card-earn  { --card-glow: rgba(245,200,66,0.15); }
+    .card-earn:hover  { border-color: var(--gold); box-shadow: 0 16px 48px rgba(245,200,66,0.15), 0 0 0 1px var(--gold); }
+
+    .card-withdraw { --card-glow: rgba(48,232,155,0.12); }
+    .card-withdraw:hover { border-color: var(--green); box-shadow: 0 16px 48px rgba(48,232,155,0.12), 0 0 0 1px var(--green); }
+
+    .card-promo { --card-glow: rgba(155,109,255,0.15); }
+    .card-promo:hover { border-color: var(--purple); box-shadow: 0 16px 48px rgba(155,109,255,0.15), 0 0 0 1px var(--purple); }
+
+    .card-icon {
+      width: 72px; height: 72px;
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px;
+      position: relative;
+      z-index: 1;
+    }
+    .card-earn    .card-icon { background: rgba(245,200,66,0.12); box-shadow: 0 0 24px rgba(245,200,66,0.2); }
+    .card-withdraw .card-icon { background: rgba(48,232,155,0.10); box-shadow: 0 0 24px rgba(48,232,155,0.15); }
+    .card-promo   .card-icon { background: rgba(155,109,255,0.12); box-shadow: 0 0 24px rgba(155,109,255,0.2); }
+
+    .card-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-align: center;
+      position: relative; z-index: 1;
+    }
+    .card-earn    .card-title { color: var(--gold); }
+    .card-withdraw .card-title { color: var(--green); }
+    .card-promo   .card-title { color: var(--purple); }
+
+    .card-desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+      position: relative; z-index: 1;
+    }
+
+    .card-btn {
+      margin-top: 8px;
+      padding: 10px 28px;
+      border-radius: 50px;
+      border: none;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative; z-index: 1;
+    }
+    .card-earn    .card-btn { background: var(--gold); color: #080a0f; }
+    .card-earn    .card-btn:hover { background: #ffe680; box-shadow: 0 0 20px var(--gold-glow); }
+    .card-withdraw .card-btn { background: var(--green); color: #080a0f; }
+    .card-withdraw .card-btn:hover { background: #5effc0; box-shadow: 0 0 20px rgba(48,232,155,0.4); }
+    .card-promo   .card-btn { background: var(--purple); color: #fff; }
+    .card-promo   .card-btn:hover { background: #b98aff; box-shadow: 0 0 20px rgba(155,109,255,0.4); }
+
+    /* ── Ticker strip ── */
+    .ticker {
+      margin-top: 50px;
+      width: 100%;
+      max-width: 900px;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 0;
+      overflow: hidden;
+      animation: fadeUp 0.7s ease 0.5s both;
+    }
+    .ticker-inner {
+      display: flex;
+      gap: 60px;
+      white-space: nowrap;
+      animation: tickerScroll 20s linear infinite;
+    }
+    .ticker-item {
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+    }
+    .ticker-item .hi { color: var(--green); }
+    .ticker-item .lo { color: var(--red); }
+    .ticker-item .coin { color: var(--gold); font-family: 'Orbitron', monospace; font-size: 0.75rem; }
+
+    @keyframes tickerScroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ── Modal (Withdraw & Promo) ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(5,7,12,0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; animation: fadeIn 0.3s ease; }
+
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 40px 36px;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .modal h2 {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.3rem;
+      margin-bottom: 12px;
+    }
+    .modal p { color: var(--muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px; }
+    .modal input {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      margin-bottom: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .modal input:focus { border-color: var(--gold); }
+    .modal-actions { display: flex; gap: 12px; justify-content: center; }
+    .btn-primary {
+      padding: 12px 32px; border-radius: 50px; border: none;
+      background: var(--gold); color: #080a0f;
+      font-family: 'Rajdhani', sans-serif; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-primary:hover { background: #ffe680; }
+    .btn-secondary {
+      padding: 12px 32px; border-radius: 50px;
+      border: 1px solid var(--card-border); background: transparent;
+      color: var(--muted); font-family: 'Rajdhani', sans-serif; font-size: 1rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--muted); color: var(--text); }
+
+    /* ── Keyframes ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 40px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      animation: fadeUp 0.7s ease 0.6s both;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 30px; right: 30px;
+      background: var(--card);
+      border: 1px solid var(--green);
+      color: var(--green);
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      z-index: 200;
+      transform: translateX(120%);
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 0 20px rgba(48,232,155,0.15);
+    }
+    .toast.show { transform: translateX(0); }
+  </style>
+</head>
+<body>
+
+  <!-- Background -->
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <div class="wrapper">
+
+    <!-- Header -->
+    <header>
+      <div class="logo-ring">🪙</div>
+      <h1>COINVAULT</h1>
+      <p class="subtitle">Your Digital Reward Hub</p>
+      <div class="balance-bar">
+        <div class="balance-dot"></div>
+        <span>BALANCE</span>
+        <strong id="balanceDisplay">0</strong> COINS
+      </div>
+    </header>
+
+    <!-- Cards -->
+    <div class="cards">
+
+      <!-- Earn Coin -->
+      <a class="card card-earn" href="https://earn-coin.streamlit.app/" target="_blank" id="earnCard">
+        <div class="card-icon">🎬</div>
+        <div class="card-title">Earn Coins</div>
+        <div class="card-desc">Watch short video ads and earn real coins directly to your wallet.</div>
+        <button class="card-btn" onclick="event.preventDefault(); window.open('https://earn-coin.streamlit.app/','_blank')">Start Earning →</button>
+      </a>
+
+      <!-- Withdraw -->
+      <div class="card card-withdraw" onclick="openModal('withdraw')">
+        <div class="card-icon">💸</div>
+        <div class="card-title">Withdraw</div>
+        <div class="card-desc">Cash out your earned coins to UPI, PayPal, or gift cards instantly.</div>
+        <button class="card-btn">Withdraw Now →</button>
+      </div>
+
+      <!-- Promo Code -->
+      <div class="card card-promo" onclick="openModal('promo')">
+        <div class="card-icon">🎁</div>
+        <div class="card-title">Promo Code</div>
+        <div class="card-desc">Enter exclusive promo codes to claim bonus coins and rewards.</div>
+        <button class="card-btn">Enter Code →</button>
+      </div>
+
+    </div>
+
+    <!-- Ticker -->
+    <div class="ticker">
+      <div class="ticker-inner" id="ticker"></div>
+    </div>
+
+    <footer>© 2025 CoinVault &nbsp;·&nbsp; All Rights Reserved</footer>
+  </div>
+
+  <!-- Withdraw Modal -->
+  <div class="modal-overlay" id="withdrawModal">
+    <div class="modal">
+      <h2 style="color:var(--green)">💸 Withdraw Coins</h2>
+      <p>Enter the amount to withdraw and your payment details. Minimum: <strong style="color:var(--gold)">500 Coins</strong>.</p>
+      <input type="number" placeholder="Amount in Coins" id="withdrawAmount" min="500"/>
+      <input type="text" placeholder="UPI ID / PayPal / Wallet Address" id="withdrawAddr"/>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal('withdraw')">Cancel</button>
+        <button class="btn-primary" onclick="submitWithdraw()">Withdraw</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Promo Modal -->
+  <div class="modal-overlay" id="promoModal">
+    <div class="modal">
+      <h2 style="color:var(--purple)">🎁 Promo Code</h2>
+      <p>Enter your exclusive promo code below to claim <strong style="color:var(--gold)">bonus coins</strong> added instantly!</p>
+      <input type="text" placeholder="e.g. BONUS100" id="promoInput" style="text-transform:uppercase; letter-spacing:0.2em; text-align:center;"/>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal('promo')">Cancel</button>
+        <button class="btn-primary" style="background:var(--purple)" onclick="submitPromo()">Claim Reward</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ── Balance ──
+    let balance = parseInt(localStorage.getItem('cvBalance') || '0');
+    document.getElementById('balanceDisplay').textContent = balance.toLocaleString();
+
+    // Listen for balance updates from the earn page
+    window.addEventListener('storage', e => {
+      if (e.key === 'cvBalance') {
+        balance = parseInt(e.newValue || '0');
+        document.getElementById('balanceDisplay').textContent = balance.toLocaleString();
+      }
+    });
+
+    // ── Ticker ──
+    const tickerData = [
+      { label:'TOP EARNER TODAY', value:'12,480', type:'hi' },
+      { label:'ADS WATCHED', value:'8,341', type:'coin' },
+      { label:'PROMO CLAIMS', value:'2,190', type:'hi' },
+      { label:'COINS DISTRIBUTED', value:'4.2M', type:'coin' },
+      { label:'WITHDRAWALS TODAY', value:'₹ 18,500', type:'lo' },
+      { label:'ACTIVE USERS', value:'3,728', type:'hi' },
+    ];
+    const inner = document.getElementById('ticker');
+    const items = [...tickerData, ...tickerData].map(d =>
+      `<span class="ticker-item"><span class="${d.type}">${d.label}:</span> ${d.value}</span>`
+    ).join('');
+    inner.innerHTML = items;
+
+    // ── Modals ──
+    function openModal(type) {
+      document.getElementById(type + 'Modal').classList.add('open');
+    }
+    function closeModal(type) {
+      document.getElementById(type + 'Modal').classList.remove('open');
+    }
+
+    // close on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+      el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+    });
+
+    // ── Submit Withdraw ──
+    function submitWithdraw() {
+      const amt = parseInt(document.getElementById('withdrawAmount').value) || 0;
+      const addr = document.getElementById('withdrawAddr').value.trim();
+      if (amt < 500) return showToast('⚠️ Minimum 500 coins required', 'var(--red)');
+      if (!addr) return showToast('⚠️ Please enter your payment address', 'var(--red)');
+      if (amt > balance) return showToast('⚠️ Insufficient coins', 'var(--red)');
+      balance -= amt;
+      localStorage.setItem('cvBalance', balance);
+      document.getElementById('balanceDisplay').textContent = balance.toLocaleString();
+      closeModal('withdraw');
+      showToast(`✅ Withdrawal of ${amt} coins submitted!`, 'var(--green)');
+    }
+
+    // ── Submit Promo ──
+    const promoCodes = { 'BONUS100': 100, 'COINVAULT': 250, 'WELCOME500': 500, 'LUCKY50': 50 };
+    const usedCodes = JSON.parse(localStorage.getItem('usedCodes') || '[]');
+
+    function submitPromo() {
+      const code = document.getElementById('promoInput').value.trim().toUpperCase();
+      if (!code) return showToast('⚠️ Enter a promo code', 'var(--red)');
+      if (usedCodes.includes(code)) return showToast('⚠️ Already used this code', 'var(--red)');
+      if (!promoCodes[code]) return showToast('❌ Invalid promo code', 'var(--red)');
+      const reward = promoCodes[code];
+      balance += reward;
+      localStorage.setItem('cvBalance', balance);
+      usedCodes.push(code);
+      localStorage.setItem('usedCodes', JSON.stringify(usedCodes));
+      document.getElementById('balanceDisplay').textContent = balance.toLocaleString();
+      closeModal('promo');
+      showToast(`🎉 +${reward} Coins added! Code: ${code}`, 'var(--gold)');
+    }
+
+    // ── Toast ──
+    let toastTimer;
+    function showToast(msg, color = 'var(--green)') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.borderColor = color;
+      t.style.color = color;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+    }
+  </script>
+</body>
+</html>
